@@ -10,7 +10,6 @@ import { auth } from "./firebase";
 const App: FC = () => {
   const user = useSelector(selectUser);
   const dispatch = useDispatch();
-
   useEffect(() => {
     const unSub = auth.onAuthStateChanged((authUser) => {
       if (authUser) {

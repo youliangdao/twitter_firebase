@@ -6,10 +6,12 @@ import Paper from "@material-ui/core/Paper";
 import { makeStyles } from "@material-ui/core/styles";
 import TextField from "@material-ui/core/TextField";
 import Typography from "@material-ui/core/Typography";
+import { Email } from "@material-ui/icons";
 import LockOutlinedIcon from "@material-ui/icons/LockOutlined";
-import React, { FC } from "react";
+import React, { ChangeEvent, FC, useState } from "react";
 
 import { auth, provider } from "../firebase";
+import styles from "./Auth.module.css";
 
 const useStyles = makeStyles((theme) => ({
   avatar: {
@@ -46,6 +48,16 @@ const useStyles = makeStyles((theme) => ({
 
 const Auth: FC = () => {
   const classes = useStyles();
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [isLogin, setIsLogin] = useState(true);
+
+  const signInEmail = async () => {
+    await auth.signInWithEmailAndPassword(email, password);
+  };
+  const signUpEmail = async () => {
+    await auth.createUserWithEmailAndPassword(email, password);
+  };
   const signInGoogle = async () => {
     await auth.signInWithPopup(provider).catch((error) => {
       alert(error.messages);
@@ -61,7 +73,7 @@ const Auth: FC = () => {
             <LockOutlinedIcon />
           </Avatar>
           <Typography component="h1" variant="h5">
-            Sign in
+            {isLogin ? "Login" : "Register"}
           </Typography>
           <form className={classes.form} noValidate>
             <TextField
@@ -75,6 +87,10 @@ const Auth: FC = () => {
               autoComplete="email"
               // eslint-disable-next-line jsx-a11y/no-autofocus
               autoFocus
+              value={email}
+              onChange={(e: ChangeEvent<HTMLInputElement>) =>
+                setEmail(e.target.value)
+              }
             />
             <TextField
               variant="outlined"
@@ -86,17 +102,54 @@ const Auth: FC = () => {
               type="password"
               id="password"
               autoComplete="current-password"
+              value={password}
+              onChange={(e: ChangeEvent<HTMLInputElement>) =>
+                setPassword(e.target.value)
+              }
             />
 
             <Button
-              type="submit"
               fullWidth
               variant="contained"
               color="primary"
               className={classes.submit}
+              startIcon={<Email />}
+              onClick={
+                isLogin
+                  ? async () => {
+                      try {
+                        await signInEmail();
+                        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+                      } catch (error: any) {
+                        alert(error.message);
+                      }
+                    }
+                  : async () => {
+                      try {
+                        await signUpEmail();
+                        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+                      } catch (error: any) {
+                        alert(error.message);
+                      }
+                    }
+              }
             >
-              Sign In
+              {isLogin ? "Login" : "Register"}
             </Button>
+            <Grid container>
+              <Grid item xs>
+                <span className={styles.login_reset}>Forgot password?</span>
+              </Grid>
+              <Grid item xs>
+                <span
+                  className={styles.login_toggleMode}
+                  onClick={() => setIsLogin(!isLogin)}
+                  aria-hidden
+                >
+                  {isLogin ? "Create new account ?" : "Back to login"}
+                </span>
+              </Grid>
+            </Grid>
             <Button
               fullWidth
               variant="contained"
