@@ -1,6 +1,11 @@
-import { createSlice } from "@reduxjs/toolkit";
+import { createSlice, PayloadAction } from "@reduxjs/toolkit";
 
 import { RootState } from "../app/store";
+
+interface USER {
+  displayName: string;
+  photoUrl: string;
+}
 
 export const userSlice = createSlice({
   name: "user",
@@ -14,10 +19,14 @@ export const userSlice = createSlice({
     logout: (state) => {
       state.user = { displayName: "", photoUrl: "", uid: "" };
     },
+    updateUserProfile: (state, action: PayloadAction<USER>) => {
+      state.user.photoUrl = action.payload.photoUrl;
+      state.user.displayName = action.payload.displayName;
+    },
   },
 });
 
-export const { login, logout } = userSlice.actions;
+export const { login, logout, updateUserProfile } = userSlice.actions;
 
 export const selectUser = (state: RootState) => state.user.user;
 
