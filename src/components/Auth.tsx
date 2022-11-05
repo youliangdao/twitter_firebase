@@ -9,8 +9,10 @@ import Typography from "@material-ui/core/Typography";
 import { Email } from "@material-ui/icons";
 import LockOutlinedIcon from "@material-ui/icons/LockOutlined";
 import React, { ChangeEvent, FC, useState } from "react";
+import { useDispatch } from "react-redux";
 
-import { auth, provider } from "../firebase";
+import { updateUserProfile } from "../features/userSlice";
+import { auth, provider, storage } from "../firebase";
 import styles from "./Auth.module.css";
 
 const useStyles = makeStyles((theme) => ({
@@ -50,10 +52,44 @@ const Auth: FC = () => {
   const classes = useStyles();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [userName, setUserName] = useState("");
+  const [avatarImage, setAvatarImage] = useState<File | null>(null);
   const [isLogin, setIsLogin] = useState(true);
+  const dispatch = useDispatch();
 
+  const onChangeImageHandler = (e: ChangeEvent<HTMLInputElement>) => {
+    // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+    if (e.target.files![0]) {
+      // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+      setAvatarImage(e.target.files![0]);
+      e.target.value = "";
+    }
+  };
   const signInEmail = async () => {
-    await auth.signInWithEmailAndPassword(email, password);
+    const authUser = await auth.signInWithEmailAndPassword(email, password);
+    let url = "";
+    if (avatarImage) {
+      const S =
+        "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
+      const N = 16;
+      const randomChar = Array.from(crypto.getRandomValues(new Uint32Array(N)))
+        .map((n) => S[n % S.length])
+        .join("");
+      const fileName = randomChar + "_" + avatarImage.name;
+
+      await storage.ref(`avatars/${fileName}`).put(avatarImage);
+      url = await storage.ref("avatars").child(fileName).getDownloadURL();
+    }
+    await authUser.user?.updateProfile({
+      displayName: userName,
+      photoURL: url,
+    });
+    dispatch(
+      updateUserProfile({
+        displayName: userName,
+        photoUrl: url,
+      })
+    );
   };
   const signUpEmail = async () => {
     await auth.createUserWithEmailAndPassword(email, password);
