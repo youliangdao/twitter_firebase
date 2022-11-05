@@ -1,3 +1,4 @@
+import { Box, IconButton } from "@material-ui/core";
 import Avatar from "@material-ui/core/Avatar";
 import Button from "@material-ui/core/Button";
 import CssBaseline from "@material-ui/core/CssBaseline";
@@ -6,7 +7,7 @@ import Paper from "@material-ui/core/Paper";
 import { makeStyles } from "@material-ui/core/styles";
 import TextField from "@material-ui/core/TextField";
 import Typography from "@material-ui/core/Typography";
-import { Email } from "@material-ui/icons";
+import { AccountCircle, Email } from "@material-ui/icons";
 import LockOutlinedIcon from "@material-ui/icons/LockOutlined";
 import React, { ChangeEvent, FC, useState } from "react";
 import { useDispatch } from "react-redux";
@@ -65,8 +66,8 @@ const Auth: FC = () => {
       e.target.value = "";
     }
   };
-  const signInEmail = async () => {
-    const authUser = await auth.signInWithEmailAndPassword(email, password);
+  const signUpEmail = async () => {
+    const authUser = await auth.createUserWithEmailAndPassword(email, password);
     let url = "";
     if (avatarImage) {
       const S =
@@ -91,9 +92,10 @@ const Auth: FC = () => {
       })
     );
   };
-  const signUpEmail = async () => {
-    await auth.createUserWithEmailAndPassword(email, password);
+  const signInEmail = async () => {
+    await auth.signInWithEmailAndPassword(email, password);
   };
+
   const signInGoogle = async () => {
     await auth.signInWithPopup(provider).catch((error) => {
       alert(error.messages);
@@ -112,6 +114,45 @@ const Auth: FC = () => {
             {isLogin ? "Login" : "Register"}
           </Typography>
           <form className={classes.form} noValidate>
+            {!isLogin && (
+              <>
+                <TextField
+                  variant="outlined"
+                  margin="normal"
+                  required
+                  fullWidth
+                  id="userName"
+                  label="UserName"
+                  name="userName"
+                  autoComplete="userName"
+                  // eslint-disable-next-line jsx-a11y/no-autofocus
+                  autoFocus
+                  value={userName}
+                  onChange={(e: ChangeEvent<HTMLInputElement>) =>
+                    setUserName(e.target.value)
+                  }
+                />
+                <Box textAlign="center">
+                  <IconButton>
+                    <label>
+                      <AccountCircle
+                        fontSize="large"
+                        className={
+                          avatarImage
+                            ? styles.login_addIconLoaded
+                            : styles.login_addIcon
+                        }
+                      />
+                      <input
+                        className={styles.login_hiddenIcon}
+                        type="file"
+                        onChange={onChangeImageHandler}
+                      />
+                    </label>
+                  </IconButton>
+                </Box>
+              </>
+            )}
             <TextField
               variant="outlined"
               margin="normal"
@@ -145,6 +186,11 @@ const Auth: FC = () => {
             />
 
             <Button
+              disabled={
+                isLogin
+                  ? !email || password.length < 6
+                  : !userName || !email || password.length < 6 || !avatarImage
+              }
               fullWidth
               variant="contained"
               color="primary"
