@@ -1,14 +1,14 @@
 import { Avatar, IconButton } from "@material-ui/core";
 import { AddAPhoto } from "@material-ui/icons";
 import firebase from "firebase/app";
-import React, { ChangeEvent, FormEvent, useState } from "react";
+import React, { ChangeEvent, FC, FormEvent, useState } from "react";
 import { useSelector } from "react-redux";
 
 import { selectUser } from "../features/userSlice";
 import { auth, db, storage } from "../firebase";
 import styles from "./TweetInput.module.css";
 
-const TweetInput = () => {
+const TweetInput: FC = () => {
   const user = useSelector(selectUser);
   const [tweetImage, setTweetImage] = useState<File | null>(null);
   const [tweetMsg, setTweetMsg] = useState("");
