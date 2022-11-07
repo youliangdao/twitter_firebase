@@ -1,11 +1,12 @@
-import { Avatar } from "@material-ui/core";
+import { Avatar, IconButton } from "@material-ui/core";
+import { AddAPhoto } from "@material-ui/icons";
 import firebase from "firebase/app";
 import React, { ChangeEvent, FormEvent, useState } from "react";
 import { useSelector } from "react-redux";
 
 import { selectUser } from "../features/userSlice";
 import { auth, db, storage } from "../firebase";
-import styled from "./TweetInput.module.css";
+import styles from "./TweetInput.module.css";
 
 const TweetInput = () => {
   const user = useSelector(selectUser);
@@ -36,6 +37,7 @@ const TweetInput = () => {
         .put(tweetImage);
       uploadTweetImage.on(
         firebase.storage.TaskEvent.STATE_CHANGED,
+        // eslint-disable-next-line @typescript-eslint/no-empty-function
         () => {},
         (err) => {
           alert(err.message);
@@ -56,6 +58,8 @@ const TweetInput = () => {
             });
         }
       );
+      setTweetImage(null);
+      setTweetMsg("");
     } else {
       db.collection("posts").add({
         avatar: user.photoUrl,
@@ -69,15 +73,51 @@ const TweetInput = () => {
     }
   };
   return (
-    <div>
-      <Avatar
-        className={styled.tweet_avatar}
-        src={user.photoUrl}
-        onClick={async () => {
-          await auth.signOut();
-        }}
-      />
-    </div>
+    <>
+      <form onSubmit={sendTweet}>
+        <div className={styles.tweet_form}>
+          <Avatar
+            className={styles.tweet_avatar}
+            src={user.photoUrl}
+            onClick={async () => {
+              await auth.signOut();
+            }}
+          />
+          <input
+            className={styles.tweet_input}
+            placeholder="What's happening?"
+            type="text"
+            // eslint-disable-next-line jsx-a11y/no-autofocus
+            autoFocus
+            value={tweetMsg}
+            onChange={(e) => setTweetMsg(e.target.value)}
+          />
+          <IconButton>
+            <label>
+              <AddAPhoto
+                className={
+                  tweetImage ? styles.tweet_addIconLoaded : styles.tweet_addIcon
+                }
+              />
+              <input
+                className={styles.tweet_hiddenIcon}
+                type="file"
+                onChange={onChangeImageHandler}
+              />
+            </label>
+          </IconButton>
+        </div>
+        <button
+          type="submit"
+          disabled={!tweetMsg}
+          className={
+            tweetMsg ? styles.tweet_sendBtn : styles.tweet_sendDisableBtn
+          }
+        >
+          Tweet
+        </button>
+      </form>
+    </>
   );
 };
 
