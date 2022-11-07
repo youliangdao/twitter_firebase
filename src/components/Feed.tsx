@@ -1,21 +1,22 @@
-import firebase from "firebase/app";
 import React, { FC, useEffect, useState } from "react";
 
 import { db } from "../firebase";
 import styles from "./Feed.module.css";
+import Post from "./Post";
 import TweetInput from "./TweetInput";
 
-type Post = {
+export type Tweet = {
   id: string;
   avatar: string;
   image: string;
   text: string;
-  timestamp: firebase.firestore.FieldValue | null;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  timestamp: any;
   userName: string;
 };
 
 const Feed: FC = () => {
-  const [posts, setPosts] = useState<Post[]>([
+  const [posts, setPosts] = useState<Tweet[]>([
     {
       id: "",
       avatar: "",
@@ -51,9 +52,13 @@ const Feed: FC = () => {
   return (
     <div className={styles.feed}>
       <TweetInput />
-      {posts.map((post) => (
-        <h3 key={post.id}>{post.image}</h3>
-      ))}
+      {posts[0]?.id && (
+        <>
+          {posts.map((post) => (
+            <Post key={post.id} post={post} />
+          ))}
+        </>
+      )}
     </div>
   );
 };
